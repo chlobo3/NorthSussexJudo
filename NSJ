@@ -1,8 +1,8 @@
 from tkinter import *
 from tkinter import messagebox
-from PIL import Image
+from PIL import Image 
 
-#the main window, the info on frame switches is stored here. (window switches) as well as consistent gui features that will be true on all frames  
+#the main window, the info on frame switches is stored here
 
 class Window(Tk):
 
@@ -24,24 +24,24 @@ class Window(Tk):
 
         self.frames = {} 
 
-        for F in (Login, Menu):
-            page_name = F.__name__
-            frame = F(parent=container, controller=self)
+        for Page in (Login, Menu):
+            page_name = Page.__name__
+            frame = Page(parent=container, controller=self)
             self.frames[page_name] = frame
             frame.grid(row=0, column=0, sticky="nsew")
-
+        
         self.show_frame("Login")
 
     def show_frame(self, page_name):
         frame = self.frames[page_name]
         frame.tkraise()
 
+        
 class Login(Frame):
 
     def __init__(self, parent, controller):
         super().__init__(parent)
-
-   
+        self.controller = controller
         
         self.img = PhotoImage(file="nsjfinal.png")
 
@@ -77,7 +77,9 @@ class Login(Frame):
                  text= "log in",
                  command=lambda: self.check_login(controller)).place(x=475, y=295)
         
-    def check_login( self, controller):
+    def check_login(self, controller):
+
+        self.controller = controller
 
         username = "coach"
         password = "123"
@@ -91,12 +93,13 @@ class Login(Frame):
         
 
 class Menu(Frame):
-    def __init__(self, parent):
+    def __init__(self, parent, controller):
         super().__init__(parent)
+        self.controller = controller
 
         self.menuimg = PhotoImage(file="menu.png")
 
-        Label(self, image= self.menuimg, width=800, height=700).place(x=0,y=0, relwidth=1,relheight=1)
+        menu_bg=Label(self, image= self.menuimg, width=800, height=700).place(x=0,y=0, relwidth=1,relheight=1)
 
 
 window = Window()
