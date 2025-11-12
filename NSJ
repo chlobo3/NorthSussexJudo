@@ -1,0 +1,103 @@
+from tkinter import *
+from tkinter import messagebox
+from PIL import Image
+
+#the main window, the info on frame switches is stored here. (window switches) as well as consistent gui features that will be true on all frames  
+
+class Window(Tk):
+
+    def __init__(self):
+        super().__init__()
+
+        WIDTH = 800
+        HEIGHT = 700
+
+        self.title("North Sussex Judo")
+        self.geometry(f"{WIDTH}x{HEIGHT}") #fixed window size
+        self.resizable(False, False) #the user cannot resize the window, this is because there are fixed background imgs.
+
+        container = Frame(self) #frame holder, this container holds the pages
+        container.pack(side="top", fill="both", expand=True) #expand true makes sure that the frames fill the entire window.
+
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1) 
+
+        self.frames = {} 
+
+        for F in (Login, Menu):
+            page_name = F.__name__
+            frame = F(parent=container, controller=self)
+            self.frames[page_name] = frame
+            frame.grid(row=0, column=0, sticky="nsew")
+
+        self.show_frame("Login")
+
+    def show_frame(self, page_name):
+        frame = self.frames[page_name]
+        frame.tkraise()
+
+class Login(Frame):
+
+    def __init__(self, parent, controller):
+        super().__init__(parent)
+
+   
+        
+        self.img = PhotoImage(file="nsjfinal.png")
+
+        background = Label(self, image = self.img, width = 800, height = 700)
+        background.place(x=0, y=0, relwidth=1, relheight=1)
+
+        
+        user_login= Label(self, 
+                        text= "Username",
+                        font=('serif',10, 'bold'),
+                        fg='black',
+                        bg='white').place(x=250, y=250)
+        
+        user_entry = Entry(self,
+                        font=('serif',10,'bold'),
+                        fg='black',
+                        bg='white').place(x=325, y=250)
+        
+        password = Label(self,
+                        text= "Password",
+                        font=('serif',10, 'bold'),
+                        fg='black',
+                        bg='white').place(x=250, y=300)
+        
+
+        pass_entry = Entry(self,
+                        font=('serif',10,'bold'),
+                        fg='black',
+                        bg='white',
+                        show='*').place(x=325, y=300)
+        
+        Button(self,
+                 text= "log in",
+                 command=lambda: self.check_login(controller)).place(x=475, y=295)
+        
+    def check_login( self, controller):
+
+        username = "coach"
+        password = "123"
+
+        if self.user_entry.get() == username and self.pass_entry.get() == password:
+            controller.show_frame("Menu")
+        
+        else: 
+            messagebox.showerror(text="Login unsuccessful", message="Please try again")
+
+        
+
+class Menu(Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.menuimg = PhotoImage(file="menu.png")
+
+        Label(self, image= self.menuimg, width=800, height=700).place(x=0,y=0, relwidth=1,relheight=1)
+
+
+window = Window()
+window.mainloop()
