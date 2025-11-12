@@ -36,7 +36,7 @@ class Window(Tk):
         frame = self.frames[page_name]
         frame.tkraise()
 
-        
+
 class Login(Frame):
 
     def __init__(self, parent, controller):
@@ -48,49 +48,50 @@ class Login(Frame):
         background = Label(self, image = self.img, width = 800, height = 700)
         background.place(x=0, y=0, relwidth=1, relheight=1)
 
-        
-        user_login= Label(self, 
-                        text= "Username",
-                        font=('serif',10, 'bold'),
-                        fg='black',
-                        bg='white').place(x=250, y=250)
-        
-        user_entry = Entry(self,
-                        font=('serif',10,'bold'),
-                        fg='black',
-                        bg='white').place(x=325, y=250)
-        
-        password = Label(self,
-                        text= "Password",
-                        font=('serif',10, 'bold'),
-                        fg='black',
-                        bg='white').place(x=250, y=300)
-        
 
-        pass_entry = Entry(self,
-                        font=('serif',10,'bold'),
-                        fg='black',
-                        bg='white',
-                        show='*').place(x=325, y=300)
+        login_title = Label(self, text="Login", font=('serif',12, 'bold'), fg='black', bg='white').place(x=250, y=215)
         
-        Button(self,
-                 text= "log in",
-                 command=lambda: self.check_login(controller)).place(x=475, y=295)
-        
-    def check_login(self, controller):
+        self.user_login = Label(self,
+                            text="Username",
+                            font=('serif', 12, 'bold'),
+                            fg='black',
+                            bg='white')
+        self.user_login.place(x=250, y=250)
 
-        self.controller = controller
+        self.user_entry = Entry(self,
+                            font=('serif', 10, 'bold'),
+                            fg='black',
+                            bg='white')
+        self.user_entry.place(x=345, y=250)
+
+        self.password = Label(self,
+                            text="Password",
+                            font=('serif', 12, 'bold'),
+                            fg='black',
+                            bg='white')
+        self.password.place(x=250, y=285)
+
+        self.pass_entry = Entry(self,
+                                font=('serif', 10, 'bold'),
+                                fg='black',
+                                bg='white',
+                                show='*')
+        self.pass_entry.place(x=345, y=285)
+
+        Button(self,text="Log-In",command=lambda: self.check_login( controller,self.user_entry.get(),self.pass_entry.get())).place(x=500, y=295)
+
+    def check_login(self, controller, user_entry, pass_entry):
 
         username = "coach"
         password = "123"
 
-        if self.user_entry.get() == username and self.pass_entry.get() == password:
+        if user_entry == username and pass_entry == password:
+            
             controller.show_frame("Menu")
+            
         
         else: 
             messagebox.showerror(text="Login unsuccessful", message="Please try again")
-
-        
 
 class Menu(Frame):
     def __init__(self, parent, controller):
