@@ -210,6 +210,7 @@ class Menu(Frame): #Athlete INPUT
         self.priv_coach_Y = Radiobutton(self, text= "Yes", variable = r , value=1, command=self.private_hours)
         self.priv_coach_Y.place(x=250, y=470)
         self.priv_coach_Y.config(bg='white',border=0)
+
         self.priv_coach = Radiobutton(self, text= "No", variable = r , value=0)
         self.priv_coach.place(x=350, y=470)
         self.priv_coach.config(bg='white', border=0)
@@ -219,7 +220,7 @@ class Menu(Frame): #Athlete INPUT
         self.enter = Button(self,text = "Enter", font = ('arial',13,'bold'),highlightbackground = 'blue',activeforeground = 'white', activebackground = 'blue', cursor = 'hand1',
                             command = self.save_input)
         self.enter.place(x=250, y=550)
-
+ 
     def private_hours(self): 
 
         if self.priv_coach_Y.cget('r'):
@@ -238,31 +239,50 @@ class Menu(Frame): #Athlete INPUT
             with open('athleteinfo.json', 'r') as f: 
                 return json.load(f) 
         except:
-            return [] 
- 
-    def force_number(self):
-
+            return []
+ #
+ #private hours
+    def force_numberHRS(self):
+       
+        hours_value = self.entry_priv.get() 
+        try:
+            hours_value = int(hours_value)
+            return hours_value
+        except ValueError:
+            messagebox.showerror("","Invalid Information")
+            return None
+ #
+ #weight
+    def force_numberKG(self):
+               
         weight_value = self.ath_weight.get()
-        
         try: 
             weight_value = int(weight_value)
             return weight_value
         except ValueError:
             messagebox.showerror("","Invalid Information")
             return None
+        
+    
+    #def weight_check(self):
+
+
    
     def save_input(self):
 
+ #
         name = self.ath_name.get()
-        weight = self.force_number()
+        weight = self.force_numberKG()
         tp = self.athlete_ops.get()
         wc = self.weighted_cat.get()
+        privhours = self.force_numberHRS()
 
         new_athlete = {
             "Name": name,
             "Weight(kg)": weight,
             "Training Plan": tp,
-            "Weight Category" : wc
+            "Weight Category" : wc,
+            "Private Hours": privhours
             }
 
         with open('athleteinfo.json', "w")as f:
@@ -270,6 +290,9 @@ class Menu(Frame): #Athlete INPUT
         
         self.ath_name.delete(0,END) 
         self.ath_weight.delete(0,END)
+        self.entry_priv.delete(0,END)
+        self.entry_priv.place_forget()
+        self.hrs.place_forget()
 
         print("works")
 
@@ -277,10 +300,10 @@ class Menu(Frame): #Athlete INPUT
         #create a JSON file[X]
         #output the info from the entry widgets [X], radio buttons / drop down menus into the JSON file []
         #from the JSON file output the info into Athlete Information []
-        #Assigns INTs to certain variables (Weight > Weight Category and Training plan > Prices)[]
+        #Assigns INTs to certain variables (Weight > Weight Category) and (Training plan > Prices)[]
+
 
 #Athlete OUTPUT / EDIT existing Athletes
-
 class Athlete_Information(Frame): 
     def __init__(self, parent, controller):
         super().__init__(parent)
