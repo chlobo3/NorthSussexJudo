@@ -119,8 +119,6 @@ class Menu(Frame): #Athlete INPUT
                           cursor='hand2')
         self.ath_info.place(x = 20,y = 178)
         self.ath_info.bind("<Button-1>", lambda e: controller.show_frame("Athlete_Information"))
-    
-
 
         self.log_out = Button(self,
                          text="Log Out",
@@ -160,17 +158,17 @@ class Menu(Frame): #Athlete INPUT
                         fg = 'black',
                         bg='white').place(x=250,y=240)
 
-        #weight_cat = Label(self,  
-                        #text = "Weight Category:",
-                        #font = ('serif',10),
-                        #fg = 'black',
-                        #bg = 'white').place(x=250,y=300)
-
-        comp_entry = Label(self,  
-                        text = "Competition Entry:",
+        weight_cat = Label(self,  
+                        text = "Weight Category:",
                         font = ('serif',10),
                         fg = 'black',
-                        bg = 'white').place(x=250,y=370)
+                        bg = 'white').place(x=250,y=300)
+
+        #comp_entry = Label(self,  
+           ##             text = "Competition Entry:",
+             #           font = ('serif',10),
+              #          fg = 'black',
+               #         bg = 'white').place(x=250,y=370)
 
         priv_hr = Label (self,
                         text = "Private Coaching:",
@@ -179,6 +177,7 @@ class Menu(Frame): #Athlete INPUT
                         bg = 'white').place(x=250,y=440)
         
         self.hrs = Label(self, text="hrs", font = ('serif', 10 ), bg = 'white',fg = 'black')
+
         #END OF GUI
 #name
         self.ath_name = Entry(self,font = ('serif',10),fg='black',width=40)
@@ -197,8 +196,8 @@ class Menu(Frame): #Athlete INPUT
 
         self.ath_TP.config(bg ='white' , relief='solid', borderwidth=1, width=10,)
        
-        
 #private hours
+
         r = StringVar()
 
         self.priv_coach_Y = Radiobutton(self, text= "Yes", variable = r , value=1, command=self.private_hours)
@@ -214,37 +213,39 @@ class Menu(Frame): #Athlete INPUT
         self.enter = Button(self,text = "Enter", font = ('arial',13,'bold'),highlightbackground = 'blue',activeforeground = 'white', activebackground = 'blue', cursor = 'hand1',
                             command = self.save_input)
         self.enter.place(x=250, y=550)
+
+#weight_cat
+
+        self.weighted_cat = StringVar(self)
+        self.weighted_cat.set("Select")
+
+        self.category = OptionMenu(self, self.weighted_cat,'Heavyweight', 'Light-Heavyweight', 'Middleweight', 'Lightweight', 'Flyweight')
+        self.category.place(x=250, y=330)
+        self.category.config(bg ='white' , relief='solid', borderwidth=1, width=18,)
  
     def private_hours(self): 
 
-        if self.priv_coach_Y.cget('r'):
-            print("meow")
+        if self.priv_coach_Y.cget('text'):
+
             self.entry_priv.place(x=250, y=500)
             self.hrs.place(x=300, y=500)
         else:
             return None
 
-    def exitwindow(self):
-        self.destroy() #doesn't work properly, will fix later
-
-    def input_entry(self):
-        
-        try:   
-            with open('athleteinfo.json', 'r') as f: 
-                return json.load(f) 
-        except:
-            return []
-
     def force_numberHRS(self):
        
-        hours_value = self.entry_priv.get() 
+       if self.priv_coach_Y == 1: 
+        hours_value = self.priv_coach_Y.cget() 
         try:
             hours_value = int(hours_value)
             return hours_value
         except ValueError:
             messagebox.showerror("","Invalid Information")
             return None
- 
+        
+    def exitwindow(self):
+        self.destroy() #doesn't work properly, will fix later
+       
     def force_numberKG(self):
                
         weight_value = self.ath_weight.get()
@@ -255,46 +256,59 @@ class Menu(Frame): #Athlete INPUT
             messagebox.showerror("","Invalid Information")
             return None
         
-    def category_check(self):
+    def total_cost(self):
 
-        weight_value = self.ath_weight.get()
-        try: 
-            weight_value = int(weight_value)
-            return weight_value
-        except ValueError:
-             messagebox.showerror("","Invalid Information")
+        private_rate = 9.5 
 
-        self.category_options = {
-                            'Flyweight' : (0, 66),
-                            'Lightweight' : (66, 73),
-                            'Light-Midleweight' : (73, 81),
-                            'Middleweight': (81, 90),
-                            'Light-Heavyweight' : (90, 100),
-                            'Heavyweight': (100, 1000)
-                            }
+        self.prices = {
+                    "Beginner" : 25.0,
+                    "Intermediate": 30.0,
+                    "Elite": 35.0,
+                    }
+
+        key =  self.athlete_ops.get()
+
+        #print(f'DEBUG key: {key}')
+
+        value = self.prices[key]
+
+        #print(f'DEBUG value: {value}')
+        #print(f'DEBUG cget(): {self.priv_coach_Y.cget("text")}')
+
+        if self.priv_coach_Y.cget("text"):
+            private_hours =  self.entry_priv.get()
+            value = value + (private_rate *float(private_hours))
+            return value
+
+    def input_entry(self):   
+        try:   
+            with open('athleteinfo.json', 'r') as f: 
+                return json.load(f) 
+        except:
+            return []
         
-        low = 0
-        high = 1000
-
-        for weight_cat, (low, high) in self.category_options.items():
-            if low <=  weight_value <= high in self.category_options.keys:
-                return self.category_options.values
-            
     def save_input(self):
 
         name = self.ath_name.get()
         weight = self.force_numberKG()
         training_plan = self.athlete_ops.get()
-        category = self.category_check()
-        priv_hours = self.force_numberHRS()
+        category = self.weighted_cat.get()
+        priv_hours = 0
+
+        if self.entry_priv.get() != "":
+            priv_hours = self.entry_priv.get()
+            
+        total_cost = self.total_cost()
 
         new_athlete = {
-            "Name": name,
-            "Weight(kg)": weight,
-            "Training Plan": training_plan,
-            "Weight Category" : category,
-            "Private Hours": priv_hours,
-            }
+                    "Name": name,
+                    "Weight(kg)": weight,
+                    "Training Plan": training_plan,
+                    "Weight Category" : category,
+                    "Private Hours": priv_hours,
+                    "Total Cost": total_cost
+                     }
+                           
 
         with open('athleteinfo.json', "w")as f:
             json.dump(new_athlete, f , indent=4) 
@@ -309,13 +323,11 @@ class Menu(Frame): #Athlete INPUT
 
  #NOTES/To Do:
         #create a JSON file[X]
-        #output the info from the entry widgets [X], radio buttons / drop down menus into the JSON file []
+        #output the info from the entry widgets [X], radio buttons / drop down menus into the JSON file [X]
         #from the JSON file output the info into Athlete Information []
-        #Assigns INTs to certain variables (Weight > Weight Category) and (Training plan > Prices)[]
+        #Assigns INTs to certain variables (Training plan > Prices)[X]
 
-
-#Athlete OUTPUT / EDIT existing Athletes
-class Athlete_Information(Frame): 
+class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
@@ -361,21 +373,22 @@ class Athlete_Information(Frame):
                         command = 'exitwindow').place(x=10, y=660)
         #END OF GUI
 
-        try:
-            with open('athleteinfo.json') as json_file:
-                json_response = json.load(json_file)
-                row = 0
+        #try:
+            #with open('athleteinfo.json') as json_file:
+               # json_response = json.load(json_file)
+               # row = 0
 
-                for Athelete in json_response["new_athlete"]:
-                    Label(self.athlete_name, text=f"Name:
-                        {Athelete["Name"]}").place(x=250,y=100)
+                #for Athelete in json_response["new_athlete"]:
+                #   Label(self.athlete_name, text=f"Name:
+                 #    {Athelete["Name"]}").place(x=250,y=100)
+               #  else:
+                   #  return []
 
         #athlete_information = Label(self,
                           #text="JSON outputted here",
                           #font=('serif',10,'bold'),
                           #fg='black',
                           #bg='white').place(x=250,y=100)
-
 
 #NOTES
         #create a scroll bar and EDIT athlete button []
