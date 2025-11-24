@@ -160,11 +160,11 @@ class Menu(Frame): #Athlete INPUT
                         fg = 'black',
                         bg='white').place(x=250,y=240)
 
-        weight_cat = Label(self,  
-                        text = "Weight Category:",
-                        font = ('serif',10),
-                        fg = 'black',
-                        bg = 'white').place(x=250,y=300)
+        #weight_cat = Label(self,  
+                        #text = "Weight Category:",
+                        #font = ('serif',10),
+                        #fg = 'black',
+                        #bg = 'white').place(x=250,y=300)
 
         comp_entry = Label(self,  
                         text = "Competition Entry:",
@@ -196,14 +196,8 @@ class Menu(Frame): #Athlete INPUT
         self.ath_TP.place(x=250, y=265) 
 
         self.ath_TP.config(bg ='white' , relief='solid', borderwidth=1, width=10,)
-
-#weight category
-        self.weighted_cat = StringVar(self)
-        self.weighted_cat.set("Select")
-
-        self.category = OptionMenu(self, self.weighted_cat,'Heavyweight', 'Light-Heavyweight', 'Middleweight', 'Lightweight', 'Flyweight')
-        self.category.place(x=250, y=330)
-        self.category.config(bg ='white' , relief='solid', borderwidth=1, width=18,)
+       
+        
 #private hours
         r = StringVar()
 
@@ -240,8 +234,7 @@ class Menu(Frame): #Athlete INPUT
                 return json.load(f) 
         except:
             return []
- #
- #private hours
+
     def force_numberHRS(self):
        
         hours_value = self.entry_priv.get() 
@@ -251,8 +244,7 @@ class Menu(Frame): #Athlete INPUT
         except ValueError:
             messagebox.showerror("","Invalid Information")
             return None
- #
- #weight
+ 
     def force_numberKG(self):
                
         weight_value = self.ath_weight.get()
@@ -263,30 +255,49 @@ class Menu(Frame): #Athlete INPUT
             messagebox.showerror("","Invalid Information")
             return None
         
-    
-    #def weight_check(self):
+    def category_check(self):
 
+        weight_value = self.ath_weight.get()
+        try: 
+            weight_value = int(weight_value)
+            return weight_value
+        except ValueError:
+             messagebox.showerror("","Invalid Information")
 
-   
+        self.category_options = {
+                            'Flyweight' : (0, 66),
+                            'Lightweight' : (66, 73),
+                            'Light-Midleweight' : (73, 81),
+                            'Middleweight': (81, 90),
+                            'Light-Heavyweight' : (90, 100),
+                            'Heavyweight': (100, 1000)
+                            }
+        
+        low = 0
+        high = 1000
+
+        for weight_cat, (low, high) in self.category_options.items():
+            if low <=  weight_value <= high in self.category_options.keys:
+                return self.category_options.values
+            
     def save_input(self):
 
- #
         name = self.ath_name.get()
         weight = self.force_numberKG()
-        tp = self.athlete_ops.get()
-        wc = self.weighted_cat.get()
-        privhours = self.force_numberHRS()
+        training_plan = self.athlete_ops.get()
+        category = self.category_check()
+        priv_hours = self.force_numberHRS()
 
         new_athlete = {
             "Name": name,
             "Weight(kg)": weight,
-            "Training Plan": tp,
-            "Weight Category" : wc,
-            "Private Hours": privhours
+            "Training Plan": training_plan,
+            "Weight Category" : category,
+            "Private Hours": priv_hours,
             }
 
         with open('athleteinfo.json', "w")as f:
-            json.dump(new_athlete, f , indent=4) #stores info, indent =  4 makes it look nice
+            json.dump(new_athlete, f , indent=4) 
         
         self.ath_name.delete(0,END) 
         self.ath_weight.delete(0,END)
@@ -350,6 +361,20 @@ class Athlete_Information(Frame):
                         command = 'exitwindow').place(x=10, y=660)
         #END OF GUI
 
+        try:
+            with open('athleteinfo.json') as json_file:
+                json_response = json.load(json_file)
+                row = 0
+
+                for Athelete in json_response["new_athlete"]:
+                    Label(self.athlete_name, text=f"Name:
+                        {Athelete["Name"]}").place(x=250,y=100)
+
+        #athlete_information = Label(self,
+                          #text="JSON outputted here",
+                          #font=('serif',10,'bold'),
+                          #fg='black',
+                          #bg='white').place(x=250,y=100)
 
 
 #NOTES
