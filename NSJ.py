@@ -4,38 +4,22 @@ from PIL import Image #pillow must be installed on PCs for GUI to work when runn
 from tkinter import ttk #for treeview
 import sqlite3
 
+#SQL data table is created:
 def create_tables():
 
         conn =  sqlite3.connect("athletes.db")
         c = conn.cursor()
 
-        c.execute("""CREATE TABLE IF NOT EXISTS athletes (
-                    name TEXT,
-                    weight INTEGER,
-                    training_plan TEXT,
-                    category TEXT,
-                    hours INTEGER,
-                    total_cost FLOAT
-              )""")
+        c.execute("""CREATE TABLE IF NOT EXISTS athletes (name TEXT,weight INTEGER, training_plan TEXT, category TEXT, hours INTEGER, total_cost FLOAT)""")
         
         conn.commit()
         conn.close()
 
+create_tables()
+print("table created")
 
-def query_database():
-
-        conn=sqlite3.connect("athletes.db")
-        c=conn.cursor()
-
-        c.execute("SELECT * FROM athletes")
-        rows = c.fetchall()
-        print(rows)
-        conn.commit()
-        conn.close()
-        return rows
 
 #the main window, the info on frame switches is stored here
-
 class Window(Tk):
 
     def __init__(self):
@@ -282,7 +266,6 @@ class Menu(Frame): #Athlete INPUT
             return None
         
     def total_cost(self):
-
         private_rate = 9.5 
 
         self.prices = {
@@ -309,37 +292,41 @@ class Menu(Frame): #Athlete INPUT
                    
     def save_input(self):
     
-        name = self.athlete_name.get()
-        weight = self.force_numberKG()
-        training_plan = self.options.get()
-        category = self.weight_category.get()
-        hours = 0
+        data_name = self.athlete_name.get()
+        data_weight = self.force_numberKG()
+        data_training_plan = self.options.get()
+        data_category = self.weight_category.get()
+        data_hours = 0
 
         if self.entry_hours.get() != "":
-            hours = int(self.entry_hours.get())
+            data_hours = int(self.entry_hours.get())
         
-        total_cost = self.total_cost()
+        data_total_cost = self.total_cost()
          
         conn = sqlite3.connect("athletes.db")
-        c = conn.cursor()
 
-        data = (name,weight,training_plan,category,hours,total_cost)
+        with conn: 
+            c= conn.cursor()
 
-        for record in data:
-            c.execute("INSERT INTO athletes VALUES (:name, :weight, :training_plan, :category, :hours, :total_cost)",)
-            {
-            'name': record[0],
-            'weight': record[1],
-            'training_plan': record[2],
-            'category': record[3],
-            'hours': record[5],
-            'total_cost':record[6]
-            }
+        c.execute('INSERT INTO athletes (name, weight, training_plan, category, hours, total_cost) VALUES(?, ?, ?, ?, ?, ?)',
+                  (data_name, data_weight, data_training_plan, data_category, data_hours, data_total_cost))
+        
+        # {
+        # 'name': name,
+        # 'weight': weight,
+        # 'training_plan': training_plan,
+        # 'category': category,
+        #'hours': hours,
+        # 'total_cost':total_cost
+        #}
         
         #(name,weight,training_plan,category,hours,total_cost))
    
         conn.commit()
         conn.close()
+
+        create_tables()
+        query_database()
     
         self.athlete_name.delete(0,END) 
         self.athlete_weight.delete(0,END)
@@ -348,11 +335,26 @@ class Menu(Frame): #Athlete INPUT
         self.hrs.place_forget()
 
         print("works")
+
+def query_database():
+                
+        conn=sqlite3.connect("athletes.db")
+        c=conn.cursor()
+
+        c.execute("SELECT * FROM athletes")
+        rows = c.fetchall()
+
+        print(rows)
     
+        conn.commit()
+        conn.close()
+        return rows
+
+
  #NOTES/To Do:
         #create an SQLITE file[X]
         #output the info from the entry widgets [X], radio buttons / drop down menus into the SQLITE file [X]
-        #from the SQlite3 file output the info into Athlete Information []
+        #from the SQlite3 file output the info into Athlete Information [X]
         #Assigns INTs to certain variables (Training plan > Prices)[X]
 
 class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
@@ -360,7 +362,7 @@ class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
         super().__init__(parent)
         self.controller = controller
         #GUI
-        self.menuimg = PhotoImage(file="athleteinfo.png")
+        self.menuimg = PhotoImage(file="menu.png")
         menu_bg=Label(self, image= self.menuimg, width=800, height=700).place(x=0,y=0, relwidth=1,relheight=1)
         
         self.ath_regi=Label(self,
@@ -400,7 +402,6 @@ class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
                         command = 'exitwindow').place(x=10, y=660)
         #END OF GUI
 
-
         style = ttk.Style()
         style.theme_use('default')
         style.configure("Treeview",
@@ -410,9 +411,8 @@ class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
                         fieldbackground = "#D3D3D36C")
         style.map('Treeview',
                   background = [('selected','#347083')])
-
+   
 #TREE VIEW
-
         tree_frame = Frame(self)
         tree_frame.place(x=170,y=100)
 
@@ -424,8 +424,6 @@ class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
         tree_scroll.config(command=self.tree.yview)
 
         #defined columns 
-
-
         self.tree['columns'] = ("Name", "Weight", "Training Plan", "Category", "Hours", "Total Cost")
         
         self.tree.column("#0", width = 0 , minwidth=0, stretch=NO)
@@ -437,7 +435,6 @@ class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
         self.tree.column("Total Cost", anchor=CENTER , width=80) 
 
         #headings 
-
         self.tree.heading("#0", text="", anchor=W)
         self.tree.heading("Name", text="Name", anchor=W )
         self.tree.heading("Weight", text="Weight(kg)", anchor=W)
@@ -446,8 +443,6 @@ class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
         self.tree.heading("Hours", text="Hours", anchor=CENTER)
         self.tree.heading("Total Cost", text="Total Cost", anchor=CENTER)
 
-
-
         self.tree.tag_configure('oddrow', background='white')
         self.tree.tag_configure('evenrow', background='lightblue')
 
@@ -455,7 +450,6 @@ class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
         count = 0
         data = query_database()
         
-
         for record in data:
             if count % 2 == 0:
                 self.tree.insert(parent='', index='end', iid=count, text="", values=(record[0],record[1],record[2],record[3],record[4],record[5]), tags =('evenrow',))
@@ -470,16 +464,10 @@ class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
         athlete_edit = Button(self, text="Edit", font=('serif',10), fg='black')
         athlete_edit.place(x=240, y=380)
     
- 
 
 #NOTES
         #create a scroll bar and EDIT athlete button [X]
-        #when clicking an edit button next to the athlete, the athlete data needs to be outputted back into athelete reg []
-        #then removed from the athlete info , and then re-outputted into athlete reg. []
 
-
-window = Window()
-window.mainloop()
 
 window = Window()
 window.mainloop()
