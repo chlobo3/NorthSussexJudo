@@ -7,10 +7,10 @@ import sqlite3
 #SQL data table is created:
 def create_tables():
 
-        conn =  sqlite3.connect("athletes.db")
+        conn =  sqlite3.connect("athlete.db")
         c = conn.cursor()
 
-        c.execute("""CREATE TABLE IF NOT EXISTS athletes (name TEXT,weight INTEGER, training_plan TEXT, category TEXT, hours INTEGER, total_cost FLOAT)""")
+        c.execute("""CREATE TABLE IF NOT EXISTS athlete (name TEXT,weight INTEGER,training_plan TEXT,category TEXT,competition INTEGER,hours INTEGER,total_cost FLOAT)""")
         
         conn.commit()
         conn.close()
@@ -18,8 +18,22 @@ def create_tables():
 create_tables()
 print("table created")
 
+def query_database():
+                
+        conn=sqlite3.connect("athlete.db")
+        c=conn.cursor()
+
+        c.execute("SELECT * FROM athlete")
+        rows = c.fetchall()
+
+        print(rows)
+    
+        conn.commit()
+        conn.close()
+        return rows
 
 #the main window, the info on frame switches is stored here
+
 class Window(Tk):
 
     def __init__(self):
@@ -176,11 +190,11 @@ class Menu(Frame): #Athlete INPUT
                         fg = 'black',
                         bg = 'white').place(x=250,y=300)
 
-        #comp_entry = Label(self,  
-        #           text = "Competition Entry:",
-        #           font = ('serif',10),
-        #           fg = 'black',       
-        #           bg = 'white').place(x=250,y=370)
+        comp_entry = Label(self,  
+                   text = "Competition Entry:",
+                   font = ('serif',10),
+                   fg = 'black',       
+                   bg = 'white').place(x=250,y=370)
 
         priv_hr = Label (self,
                         text = "Private Coaching:",
@@ -190,7 +204,7 @@ class Menu(Frame): #Athlete INPUT
         
         self.hrs = Label(self, text="hrs", font = ('serif', 10 ), bg = 'white',fg = 'black')
         #END OF GUI
-
+        
 #name
         self.athlete_name = Entry(self,font = ('serif',10),fg='black',width=40)
         self.athlete_name.place(x=250,y=130)
@@ -199,7 +213,7 @@ class Menu(Frame): #Athlete INPUT
         self.athlete_weight = Entry(self,font = ('serif',10),fg='black',width=5)
         self.athlete_weight.place(x=250,y=200) 
         
-#training plan    
+#training Plan    
         self.options = StringVar(self)
         self.options.set("Select")
    
@@ -207,8 +221,22 @@ class Menu(Frame): #Athlete INPUT
         self.athlete_training.place(x=250, y=265) 
 
         self.athlete_training.config(bg ='white' , relief='solid', borderwidth=1, width=10,)
-       
+
+#competition Entry
+        n = StringVar ()
+
+        self.comp_Yes = Radiobutton(self, text= "Yes", variable = n, value=1, command = self.competition)
+        self.comp_Yes.place(x = 250, y = 400)
+        self.comp_Yes.config(bg= 'white', border = 0)
+
+        self.comp_No = Radiobutton(self, text="No", variable= n, value=0,)
+        self.comp_No.place(x=350, y= 400)
+        self.comp_No.config(bg= 'white', border= 0 )
+        self.comp_entry = Entry(self, font = ('serif',10), fg = 'black', width = 5) 
+
+        
 #private hours
+
         r = StringVar()
 
         self.private_hours_Y = Radiobutton(self, text= "Yes", variable = r , value=1, command=self.private_hours)
@@ -226,13 +254,30 @@ class Menu(Frame): #Athlete INPUT
         self.enter.place(x=250, y=550)
 
 #weight_category
+
         self.weight_category = StringVar(self)
         self.weight_category.set("Select")
 
         self.category = OptionMenu(self, self.weight_category,'Heavyweight', 'Light-Heavyweight', 'Middleweight', 'Lightweight', 'Flyweight')
         self.category.place(x=250, y=330)
         self.category.config(bg ='white' , relief='solid', borderwidth=1, width=18,)
- 
+
+    def competition(self):
+
+        if self.comp_Yes.cget("text"): 
+            self.compentries= Label(self,
+                        text = "Entries",
+                        font = ('serif',10),
+                        fg = 'black',
+                        bg = 'white').place(x=400,y=400)           
+            self.comp_entry.place(x= 450 , y = 400)
+            comp_value = self.comp_entry.get()
+            try:
+                comp_value = int(comp_value)
+                return comp_value
+            except:
+                return None
+        
     def private_hours(self): 
 
         if self.private_hours_Y.cget("text"):
@@ -296,6 +341,7 @@ class Menu(Frame): #Athlete INPUT
         data_weight = self.force_numberKG()
         data_training_plan = self.options.get()
         data_category = self.weight_category.get()
+        a_competition = self.comp_entry.get()
         data_hours = 0
 
         if self.entry_hours.get() != "":
@@ -303,13 +349,13 @@ class Menu(Frame): #Athlete INPUT
         
         data_total_cost = self.total_cost()
          
-        conn = sqlite3.connect("athletes.db")
+        conn = sqlite3.connect("athlete.db")
 
         with conn: 
             c= conn.cursor()
 
-        c.execute('INSERT INTO athletes (name, weight, training_plan, category, hours, total_cost) VALUES(?, ?, ?, ?, ?, ?)',
-                  (data_name, data_weight, data_training_plan, data_category, data_hours, data_total_cost))
+        c.execute('INSERT INTO athlete (name, weight, training_plan, category, competition, hours, total_cost) VALUES(?, ?, ?, ?, ?, ?, ?)',
+                  (data_name, data_weight, data_training_plan, data_category, a_competition, data_hours, data_total_cost))
         
         # {
         # 'name': name,
@@ -324,10 +370,8 @@ class Menu(Frame): #Athlete INPUT
    
         conn.commit()
         conn.close()
-
-        create_tables()
         query_database()
-    
+
         self.athlete_name.delete(0,END) 
         self.athlete_weight.delete(0,END)
         self.entry_hours.delete(0,END)
@@ -335,22 +379,7 @@ class Menu(Frame): #Athlete INPUT
         self.hrs.place_forget()
 
         print("works")
-
-def query_database():
-                
-        conn=sqlite3.connect("athletes.db")
-        c=conn.cursor()
-
-        c.execute("SELECT * FROM athletes")
-        rows = c.fetchall()
-
-        print(rows)
-    
-        conn.commit()
-        conn.close()
-        return rows
-
-
+        
  #NOTES/To Do:
         #create an SQLITE file[X]
         #output the info from the entry widgets [X], radio buttons / drop down menus into the SQLITE file [X]
@@ -413,8 +442,9 @@ class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
                   background = [('selected','#347083')])
    
 #TREE VIEW
+    
         tree_frame = Frame(self)
-        tree_frame.place(x=170,y=100)
+        tree_frame.place(x=120,y=100)
 
         tree_scroll = Scrollbar(tree_frame)
         tree_scroll.pack(side=RIGHT, fill=Y)
@@ -424,15 +454,16 @@ class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
         tree_scroll.config(command=self.tree.yview)
 
         #defined columns 
-        self.tree['columns'] = ("Name", "Weight", "Training Plan", "Category", "Hours", "Total Cost")
+        self.tree['columns'] = ("Name", "Weight", "Training Plan", "Category","Competition","Hours", "Total Cost(£)")
         
         self.tree.column("#0", width = 0 , minwidth=0, stretch=NO)
         self.tree.column("Name", width = 90, minwidth=25, anchor=W)
         self.tree.column("Weight", anchor = CENTER, width = 85)
         self.tree.column("Training Plan", anchor= CENTER, width = 130)
         self.tree.column("Category", anchor= CENTER, width=130)
+        self.tree.column("Competition", anchor=CENTER, width=40)
         self.tree.column("Hours", anchor=CENTER , width=90)
-        self.tree.column("Total Cost", anchor=CENTER , width=80) 
+        self.tree.column("Total Cost(£)", anchor=CENTER , width=80) 
 
         #headings 
         self.tree.heading("#0", text="", anchor=W)
@@ -440,34 +471,69 @@ class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
         self.tree.heading("Weight", text="Weight(kg)", anchor=W)
         self.tree.heading("Training Plan", text ="Training Plan", anchor=CENTER)
         self.tree.heading("Category", text="Weight Category", anchor=CENTER)
+        self.tree.heading("Competition", text="Competition" , anchor=CENTER )
         self.tree.heading("Hours", text="Hours", anchor=CENTER)
-        self.tree.heading("Total Cost", text="Total Cost", anchor=CENTER)
+        self.tree.heading("Total Cost(£)", text="Total Cost", anchor=CENTER)
 
         self.tree.tag_configure('oddrow', background='white')
         self.tree.tag_configure('evenrow', background='lightblue')
 
+        athlete_delete = Button(self, text="Delete", font=('serif',10), fg='black', command = self.delete_data ) #deletes the user data (front end only)
+        athlete_delete.place(x=170, y=380)
+
+        #athlete_edit = Button(self, text="Edit", font=('serif',10), fg='black')
+        #athlete_edit.place(x=240, y=380)
+
+        self.refresh = Button(self, text= "Show / Refresh Data", font=('serif', 10), fg= 'black', command = self.insert_treeview)
+        self.refresh.place(x=350,y=65)
+
+    def insert_treeview(self):
+
+
         global count
         count = 0
         data = query_database()
-        
+
         for record in data:
             if count % 2 == 0:
-                self.tree.insert(parent='', index='end', iid=count, text="", values=(record[0],record[1],record[2],record[3],record[4],record[5]), tags =('evenrow',))
+                self.tree.insert(parent='', index='end', iid = count, text="", values=(record[0],record[1],record[2],record[3],record[4],record[5],record[6]), tags =('evenrow',))
             else:
-                self.tree.insert(parent='', index='end', iid=count, text="", values=(record[0],record[1],record[2],record[3],record[4],record[5]), tags =('oddrow',))
-
+                self.tree.insert(parent='', index='end', iid = count, text="", values=(record[0],record[1],record[2],record[3],record[4],record[5],record[6]), tags =('oddrow',))
             count += 1
 
-        athlete_delete = Button(self, text="Delete", font=('serif',10), fg='black')
-        athlete_delete.place(x=170, y=380)
+    #def deleteRecord(self):
 
-        athlete_edit = Button(self, text="Edit", font=('serif',10), fg='black')
-        athlete_edit.place(x=240, y=380)
-    
+        #con = sqlite3.connect("athlete.db")
+        #c = con.cursor()
+        #c.execute("DELETE FROM athlete WHERE count = ?",(1))
+        #con.commit()
+        #con.close()
+        #return c.lastrowid
+
+    #def save_user(name, weight, training_plan, category, competition, hours, total_cost):
+
+        #con = sqlite3.connect("athlete.db")
+        #c = con.cursor()
+        #Backend.create_table()
+        #c.execute("INSERT INTO athlete VALUES (?, ?, ?, ?, ?, ?, ?)", (name, weight, training_plan, category, competition, hours, total_cost))
+        #con.commit()
+        #con.close()
+        #return c.lastrowid 
+         
+    def delete_data(self):
+         
+        try: 
+            user = self.tree.selection()[0]
+            print(user)
+            messageDelete = messagebox.askyesno("Please Confirm","Do you want to delete this record?")
+            if messageDelete > 0:
+                self.tree.delete(user)
+                #self.deleteRecord(user)
+        except Exception as e:
+            print(e)
 
 #NOTES
         #create a scroll bar and EDIT athlete button [X]
-
 
 window = Window()
 window.mainloop()
