@@ -127,6 +127,8 @@ class Menu(Frame): #Athlete INPUT
         #GUI
         self.menuimg = PhotoImage(file="menu.png")
         menu_bg=Label(self, image= self.menuimg, width=800, height=700).place(x=0,y=0, relwidth=1,relheight=1)
+        self.stickynote = PhotoImage(file="stickynote.png")
+        stickynote_img = Label(self, image = self.stickynote, bg='white', width=300, height=300).place(x=460, y=375)
 
         self.ath_reg=Label(self,
                           text="Athlete Registration",
@@ -258,7 +260,7 @@ class Menu(Frame): #Athlete INPUT
         self.weight_category = StringVar(self)
         self.weight_category.set("Select")
 
-        self.category = OptionMenu(self, self.weight_category,'Heavyweight', 'Light-Heavyweight', 'Middleweight', 'Lightweight', 'Flyweight')
+        self.category = OptionMenu(self, self.weight_category,'Heavyweight', 'Light-Heavyweight', 'Middleweight','Light-Middleweight','Lightweight', 'Flyweight')
         self.category.place(x=250, y=330)
         self.category.config(bg ='white' , relief='solid', borderwidth=1, width=18,)
 
@@ -391,7 +393,7 @@ class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
         super().__init__(parent)
         self.controller = controller
         #GUI
-        self.menuimg = PhotoImage(file="menu.png")
+        self.menuimg = PhotoImage(file="athleteinfo.png")
         menu_bg=Label(self, image= self.menuimg, width=800, height=700).place(x=0,y=0, relwidth=1,relheight=1)
         
         self.ath_regi=Label(self,
@@ -444,7 +446,7 @@ class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
 #TREE VIEW
     
         tree_frame = Frame(self)
-        tree_frame.place(x=120,y=100)
+        tree_frame.place(x=170,y=100)
 
         tree_scroll = Scrollbar(tree_frame)
         tree_scroll.pack(side=RIGHT, fill=Y)
@@ -461,8 +463,8 @@ class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
         self.tree.column("Weight", anchor = CENTER, width = 85)
         self.tree.column("Training Plan", anchor= CENTER, width = 130)
         self.tree.column("Category", anchor= CENTER, width=130)
-        self.tree.column("Competition", anchor=CENTER, width=40)
-        self.tree.column("Hours", anchor=CENTER , width=90)
+        self.tree.column("Competition", anchor=CENTER, width=50)
+        self.tree.column("Hours", anchor=CENTER , width=40)
         self.tree.column("Total Cost(£)", anchor=CENTER , width=80) 
 
         #headings 
@@ -488,10 +490,13 @@ class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
         self.refresh.place(x=350,y=65)
 
     def insert_treeview(self):
-
+        
+        for item in self.tree.get_children():
+            self.tree.delete(item)
 
         global count
         count = 0
+        
         data = query_database()
 
         for record in data:
