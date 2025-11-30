@@ -1,5 +1,5 @@
 name = "Coach"
-password = "BestJudo!10"
+password = "Bestjudo!10"
 
 name_entry = input("enter your name: ") 
 password_entry = input("enter your password: ")
