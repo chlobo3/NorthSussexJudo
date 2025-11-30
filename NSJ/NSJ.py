@@ -1,5 +1,3 @@
-#!/user/bin/env python3
-
 from tkinter import *
 from tkinter import messagebox
 from PIL import Image #pillow must be installed on PCs for GUI to work when running code (pip install Pillow)
@@ -115,7 +113,7 @@ class Login(Frame):
     def check_login(self, controller, user_entry, pass_entry):
 
         username = "coach" #needs better security 
-        password = "123"
+        password = "Bestjudo!10"
 
         if user_entry == username and pass_entry == password:
             controller.show_frame("Menu")                 
@@ -287,7 +285,8 @@ class Menu(Frame): #Athlete INPUT
                 except ValueError:
                     return 0 
             
- #private hourly coaching input       
+ #private hourly coaching input
+        
     def private_hours(self): 
 
         if self.private_hours_Y.cget("text"): #when yes is clicked on the private coaching radiobutton,
@@ -300,11 +299,11 @@ class Menu(Frame): #Athlete INPUT
     
         hours_value = self.entry_hours.get() 
 
-        if self.r.get() == 0:
+        if self.r.get() == 0: #no is clicked the entry hours returns as nothing. 
             hours_value = int(hours_value)
             return hours_value
         
-        if self.r.get() == 1:   
+        if self.r.get() == 1:#yes is clicked + input validation
                 
             hours_value >= 5
             messagebox.showerror("Input Error","Only up to 5 hours of coaching is allowed")
@@ -313,8 +312,8 @@ class Menu(Frame): #Athlete INPUT
         else: 
             return hours_value
         
-        
-    def force_numberKG(self):
+#weight values:     
+    def force_numberKG(self): 
                
         weight_value = self.athlete_weight.get()
         try: 
@@ -323,8 +322,7 @@ class Menu(Frame): #Athlete INPUT
         except ValueError:
             messagebox.showerror("","Invalid Information") #if another data type is in the input, data invalid
             return None
-
-         
+       
     def total_cost(self):
 
         private_rate = 9.5 
@@ -335,13 +333,13 @@ class Menu(Frame): #Athlete INPUT
                     "Elite": 35.0,
                     }
 
-        key =  self.options.get()
-        value = self.prices[key] 
+        key =  self.options.get() #gets user input
+        value = self.prices[key] #sets the user input as the value with an assigned float
         
-        if self.r.get() == "1":
+        if self.r.get() == "1": #if the yes radio button is clicked..
 
-            private_hours = self.entry_hours.get()       
-            value = value + (private_rate *float(private_hours))
+            private_hours = self.entry_hours.get()        
+            value = value + (private_rate *float(private_hours)) #the hourly sessions are added to the training plan price
                
         return value          
                    
@@ -378,7 +376,7 @@ class Menu(Frame): #Athlete INPUT
 
         print("works")
 
-class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
+class Athlete_Information(Frame): #Athlete OUTPUT
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
@@ -477,7 +475,7 @@ class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
         #athlete_edit = Button(self, text="Edit", font=('serif',10), fg='black')
         #athlete_edit.place(x=240, y=380)
 
-        self.refresh = Button(self, text= "Show / Refresh Data", font=('serif', 10), fg= 'black', command = self.insert_treeview)
+        self.refresh = Button(self, text= "Show / Refresh Info", font=('serif', 10), fg= 'black', command = self.insert_treeview)
         self.refresh.place(x=350,y=65)
 
     def insert_treeview(self):
@@ -488,8 +486,8 @@ class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
         global count
         count = 0
         
-        data = query_database()
-
+        data = query_database() 
+#output is inserted into the treeview
         for record in data:
             if count % 2 == 0:
                 self.tree.insert(parent='', index='end', iid = count, text="", values=(record[0],record[1],record[2],record[3],record[4],record[5],record[6]), tags =('evenrow',))
@@ -528,5 +526,7 @@ class Athlete_Information(Frame): #Athlete OUTPUT / EDIT existing Athletes
             print(e)
 
 
+window = Window()
+window.mainloop()
 window = Window()
 window.mainloop()
