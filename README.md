@@ -8,4 +8,4 @@ The project also involved implementing algorithms for data validation, storage, 
 The projects images and code are all included in the file "NSJ" for the program to run.
 
 REQUIREMENTS: 
-Pillow 
+Pil (Pillow) 
