@@ -528,5 +528,3 @@ class Athlete_Information(Frame): #Athlete OUTPUT
 
 window = Window()
 window.mainloop()
-window = Window()
-window.mainloop()
